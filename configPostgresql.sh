@@ -190,14 +190,14 @@ SHMMAX=`sysctl $SYSCTL_KERNEL_NAME.shmmax | cut -d'=' -f2`
 # Removed the appended zero from the following line (relative to the original) which had the unjustified effect of making it ten times too big
 OPTIMAL_SHMMAX=`echo "scale=0; (8192 + 208) * (($MAX_MEM_KB * 1024) / $OS_PAGE_SIZE) * $SHARED_BUFFER_RATIO" | bc -l | cut -d'.' -f1`
 
-if [ $SHMMAX -lt $OPTIMAL_SHMMAX ]; then
-
-    sysctl $SYSCTL_KERNEL_NAME.shmmax=$OPTIMAL_SHMMAX
-    echo "${pgConfigNote}$SYSCTL_KERNEL_NAME.shmmax=$OPTIMAL_SHMMAX" >> /etc/sysctl.conf
-    # Nullify to avoid repeating the note
-    pgConfigNote=
-fi
-
+# if [ $SHMMAX -lt $OPTIMAL_SHMMAX ]; then
+#
+#     sysctl $SYSCTL_KERNEL_NAME.shmmax=$OPTIMAL_SHMMAX
+#     echo "${pgConfigNote}$SYSCTL_KERNEL_NAME.shmmax=$OPTIMAL_SHMMAX" >> /etc/sysctl.conf
+#     # Nullify to avoid repeating the note
+#     pgConfigNote=
+# fi
+#
 # SHMMNI
 #
 # 4096 - 8192
@@ -218,15 +218,15 @@ fi
 #
 # SHMMAX / PAGE_SIZE
 
-SHMALL=`sysctl $SYSCTL_KERNEL_NAME.shmall | cut -d'=' -f2`
-OPTIMAL_SHMALL=`echo "scale=0; $OPTIMAL_SHMMAX / $OS_PAGE_SIZE" | bc -l | cut -d'.' -f1`
-if [ $SHMALL -lt $OPTIMAL_SHMALL ]; then
-    sysctl $SYSCTL_KERNEL_NAME.shmall=$OPTIMAL_SHMALL
-    echo "${pgConfigNote}$SYSCTL_KERNEL_NAME.shmall=$OPTIMAL_SHMALL" >> /etc/sysctl.conf
-    # Nullify to avoid repeating the note
-    pgConfigNote=
-fi
-
+# SHMALL=`sysctl $SYSCTL_KERNEL_NAME.shmall | cut -d'=' -f2`
+# OPTIMAL_SHMALL=`echo "scale=0; $OPTIMAL_SHMMAX / $OS_PAGE_SIZE" | bc -l | cut -d'.' -f1`
+# if [ $SHMALL -lt $OPTIMAL_SHMALL ]; then
+#     sysctl $SYSCTL_KERNEL_NAME.shmall=$OPTIMAL_SHMALL
+#     echo "${pgConfigNote}$SYSCTL_KERNEL_NAME.shmall=$OPTIMAL_SHMALL" >> /etc/sysctl.conf
+#     # Nullify to avoid repeating the note
+#     pgConfigNote=
+# fi
+#
 
 # MAX_MEM_KB as MB
 MAX_MEM_MB=$(echo "scale=0; $MAX_MEM_KB/1024" | bc -l)
@@ -239,23 +239,23 @@ else
        SHARED_BUFFERS="$SHARED_BUFFERS"MB
 fi
 
-if [ "$OS_TYPE" = "Linux" -o "$OS_TYPE" = "GNU/Linux" ]; then
-       echo "#\tSetting virtual memory sysctls"
-       sysctl vm.swappiness=0
-       echo "vm.swappiness=0" >>/etc/sysctl.conf
-       sysctl vm.overcommit_memory=2
-       echo "vm.overcommit_memory=2" >>/etc/sysctl.conf
-
-       # >8GB RAM?  Don't let dirty data build up...this can cause latency issues!
-       # These settings taken from "PostgreSQL 9.0 High Performance" by Gregory Smith
-       if [ $MAX_MEM_MB -gt 8192 ]; then
-             echo 2 > /proc/sys/vm/dirty_ratio
-             echo 1 > /proc/sys/vm/dirty_background_ratio
-       else
-             echo 10 > /proc/sys/vm/dirty_ratio
-             echo 5 > /proc/sys/vm/dirty_background_ratio
-       fi
-fi
+# if [ "$OS_TYPE" = "Linux" -o "$OS_TYPE" = "GNU/Linux" ]; then
+#        echo "#\tSetting virtual memory sysctls"
+#        sysctl vm.swappiness=0
+#        echo "vm.swappiness=0" >>/etc/sysctl.conf
+#        sysctl vm.overcommit_memory=2
+#        echo "vm.overcommit_memory=2" >>/etc/sysctl.conf
+#
+#        # >8GB RAM?  Don't let dirty data build up...this can cause latency issues!
+#        # These settings taken from "PostgreSQL 9.0 High Performance" by Gregory Smith
+       # if [ $MAX_MEM_MB -gt 8192 ]; then
+       #       echo 2 > /proc/sys/vm/dirty_ratio
+       #       echo 1 > /proc/sys/vm/dirty_background_ratio
+       # else
+       #       echo 10 > /proc/sys/vm/dirty_ratio
+       #       echo 5 > /proc/sys/vm/dirty_background_ratio
+       # fi
+# fi
 
 WAL_BUFFERS="16MB"
 EFFECTIVE_CACHE_SIZE=$(echo "scale=0; $MAX_MEM_MB * $EFFECTIVE_CACHE_RATIO" | bc -l | cut -d'.' -f1)MB
@@ -269,8 +269,10 @@ CHECKPOINT_SEG=100
 CHECKPOINT_TIMEOUT=10min
 CHECKPOINT_COMPLETION_TARGET=0.9
 # For the initial import - switch them on again afterwards or you risk database corruption
-FSYNC=off
-FULL_PAGE_WRITES=off
+# FSYNC=off
+# FULL_PAGE_WRITES=off
+FSYNC=on
+FULL_PAGE_WRITES=on
 
 ### NOW THE FUN STUFF!!
 echo "#\tApplying system configuration settings to the server"

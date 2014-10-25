@@ -45,10 +45,10 @@ RUN ./autogen.sh
 RUN ./configure
 RUN make
 
-RUN wget --output-document=/app/data.bz2 http://download.geofabrik.de/north-america-latest.osm.bz2
+# RUN wget --output-document=/app/data.bz2 http://download.geofabrik.de/north-america-latest.osm.bz2
 # RUN wget --output-document=/app/data.bz2 http://download.geofabrik.de/north-america/us/connecticut-latest.osm.bz2
 # RUN wget --output-document=/app/data.bz2 http://download.geofabrik.de/north-america/us/vermont-latest.osm.bz2
-# RUN wget --output-document=/app/data.bz2 http://download.geofabrik.de/north-america/us/delaware-latest.osm.bz2
+RUN wget --output-document=/app/data.bz2 http://download.geofabrik.de/north-america/us/delaware-latest.osm.bz2
 WORKDIR /app/
 RUN bzip2 -d data.bz2
 
@@ -89,7 +89,10 @@ RUN service apache2 start && \
 
 
 EXPOSE 8080
-CMD service postgresql start && /usr/sbin/apache2ctl -D FOREGROUND & tail -f /var/log/apache2/*
-# RUN ls /var/log/apache2
-# RUN cat /var/log/apache2/access.log
-# RUN cat /var/log/apache2/error.log
+
+ADD configPostgresql.sh /app/nominatim/configPostgresql.sh
+WORKDIR /app/nominatim
+RUN chmod +x ./configPostgresql.sh
+ADD start.sh /app/nominatim/start.sh
+RUN chmod +x /app/nominatim/start.sh
+CMD /app/nominatim/start.sh
