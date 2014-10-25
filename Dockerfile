@@ -45,7 +45,7 @@ RUN ./autogen.sh
 RUN ./configure
 RUN make
 
-RUN wget --output-document=/app/data http://download.geofabrik.de/north-america-latest.osm.bz2
+RUN wget --output-document=/app/data.bz2 http://download.geofabrik.de/north-america-latest.osm.bz2
 # RUN wget --output-document=/app/data.bz2 http://download.geofabrik.de/north-america/us/connecticut-latest.osm.bz2
 # RUN wget --output-document=/app/data.bz2 http://download.geofabrik.de/north-america/us/vermont-latest.osm.bz2
 # RUN wget --output-document=/app/data.bz2 http://download.geofabrik.de/north-america/us/delaware-latest.osm.bz2
