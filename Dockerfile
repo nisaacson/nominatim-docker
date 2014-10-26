@@ -45,14 +45,6 @@ RUN ./autogen.sh
 RUN ./configure
 RUN make
 
-RUN wget --output-document=/app/data.bz2 http://download.geofabrik.de/north-america-latest.osm.bz2
-# RUN wget --output-document=/app/data.bz2 http://download.geofabrik.de/north-america/us/connecticut-latest.osm.bz2
-# RUN wget --output-document=/app/data.bz2 http://download.geofabrik.de/north-america/us/vermont-latest.osm.bz2
-# RUN wget --output-document=/app/data.bz2 http://download.geofabrik.de/north-america/us/delaware-latest.osm.bz2
-WORKDIR /app/
-RUN bzip2 -d data.bz2
-
-
 # Configure postgresql
 RUN service postgresql start && \
   pg_dropcluster --stop 9.1 main
@@ -64,14 +56,15 @@ RUN service postgresql start && \
   sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='www-data'" | grep -q 1 || sudo -u postgres createuser -SDR www-data && \
   sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
 
+RUN wget --output-document=/app/data.pbf http://download.geofabrik.de/north-america-latest.osm.pbf
+# RUN wget --output-document=/app/data.pbf http://download.geofabrik.de/north-america/us/delaware-latest.osm.pbf
 
 WORKDIR /app/nominatim
 RUN ./utils/setup.php --help
 
 
-
 RUN service postgresql start && \
-  sudo -u nominatim ./utils/setup.php --osm-file /app/data --all --threads 2
+  sudo -u nominatim ./utils/setup.php --osm-file /app/data.pbf --all --threads 2
 
 ADD local.php /app/nominatim/settings/local.php
 
