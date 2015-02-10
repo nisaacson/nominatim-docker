@@ -18,12 +18,12 @@ docker build -t nominatim .
 
 # Running
 
-By default the container exposes port `8072` To run the container execute
+By default the container exposes port `8080` To run the container execute
 
 ```
 # remove any existing containers
 docker rm -f nominatim_container || echo "nominatim_container not found, skipping removal"
-docker run -p 8072:8072 --name nominatim_container --detach nominatim
+docker run -p 8080:8080 --name nominatim_container --detach nominatim
 ```
 
 Check the logs of the running container
@@ -37,8 +37,8 @@ Stop the container
 docker stop nominatim_container
 ```
 
-Connect to the nominatim webserver with curl. If this succeeds, open [http://localhost:8072/](http:/localhost:8072) in a web browser
+Connect to the nominatim webserver with curl. If this succeeds, open [http://localhost:8080/](http:/localhost:8080) in a web browser
 
 ```
-curl "http://localhost:8072"
+curl "http://localhost:8080"
 ```
