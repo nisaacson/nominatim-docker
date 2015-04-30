@@ -1,4 +1,5 @@
 FROM ubuntu:14.04
+MAINTAINER jan.nonnen@gmail.com
 
 RUN apt-get update
 
@@ -60,7 +61,8 @@ RUN service postgresql start && \
 RUN service postgresql start && \
   sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='nominatim'" | grep -q 1 || sudo -u postgres createuser -s nominatim && \
   sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='www-data'" | grep -q 1 || sudo -u postgres createuser -SDR www-data && \
-  sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
+  sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim" && \
+  sudo -u postgres psql -c "CREATE USER docker WITH SUPERUSER PASSWORD 'docker';"
 
 RUN wget --output-document=/app/data.pbf http://download.geofabrik.de/europe/monaco-latest.osm.pbf
 # RUN wget --output-document=/app/data.pbf http://download.geofabrik.de/europe/luxembourg-latest.osm.pbf
@@ -84,6 +86,18 @@ RUN ls settings/
 RUN cat settings/local.php
 RUN ./utils/setup.php --create-website /var/www/nominatim
 
+
+
+# Adjust PostgreSQL configuration so that remote connections to the
+# database are possible.
+RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/9.3/main/pg_hba.conf
+
+# And add ``listen_addresses`` to ``/etc/postgresql/9.3/main/postgresql.conf``
+RUN echo "listen_addresses='*'" >> /etc/postgresql/9.3/main/postgresql.conf
+
+# Expose the PostgreSQL port
+EXPOSE 5432
+
 RUN apt-get install -y curl
 ADD 400-nominatim.conf /etc/apache2/sites-available/400-nominatim.conf
 ADD httpd.conf /etc/apache2/
@@ -91,8 +105,9 @@ RUN service apache2 start && \
   a2ensite 400-nominatim.conf && \
   /etc/init.d/apache2 reload
 
-
+# Expose the HTTP port
 EXPOSE 8080
+
 
 ADD configPostgresql.sh /app/nominatim/configPostgresql.sh
 WORKDIR /app/nominatim
