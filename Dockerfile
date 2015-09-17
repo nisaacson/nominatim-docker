@@ -12,6 +12,7 @@ RUN apt-get -y install build-essential
 RUN apt-get -y install gcc git osmosis
 RUN apt-get -y install libxml2-dev libgeos-dev libpq-dev libbz2-dev libtool automake libproj-dev
 RUN apt-get -y install proj-bin libgeos-c1 libgeos++-dev
+RUN apt-get -y install libexpat1-dev
 
 # Install Boost (required by osm2pqsql)
 RUN apt-get -y install autoconf make g++ libboost-dev \
