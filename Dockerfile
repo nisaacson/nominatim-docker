@@ -102,7 +102,6 @@ EXPOSE 5432
 
 RUN apt-get install -y curl
 ADD 400-nominatim.conf /etc/apache2/sites-available/400-nominatim.conf
-ADD httpd.conf /etc/apache2/
 RUN service apache2 start && \
   a2ensite 400-nominatim.conf && \
   /etc/init.d/apache2 reload
