@@ -27,6 +27,8 @@ RUN apt-get -y install php5 php-pear php5-pgsql php5-json php-db
 # Install Postgres, PostGIS and dependencies
 RUN apt-get -y install postgresql postgis postgresql-contrib postgresql-9.3-postgis-2.1 postgresql-server-dev-9.3
 
+# Work around for AUFS bug as per https://github.com/docker/docker/issues/783#issuecomment-56013588
+RUN mkdir /etc/ssl/private-copy; mv /etc/ssl/private/* /etc/ssl/private-copy/; rm -r /etc/ssl/private; mv /etc/ssl/private-copy /etc/ssl/private; chmod -R 0700 /etc/ssl/private; chown -R postgres /etc/ssl/private
 
 # Some additional packages that may not already be installed
 # bc is needed in configPostgresql.sh
