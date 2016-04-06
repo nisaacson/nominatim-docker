@@ -1,5 +1,7 @@
 FROM ubuntu:14.04
 MAINTAINER Jan Nonnen <helvalius@gmail.com>
+# Define the OSM argument, use monaco as default
+ARG OSM=http://download.geofabrik.de/europe/monaco-latest.osm.pbf
 
 RUN apt-get update
 
@@ -47,7 +49,7 @@ RUN mkdir -p /app/nominatim
 
 WORKDIR /app/nominatim
 
-RUN cmake /app/git/ 
+RUN cmake /app/git/
 RUN make
 
 # Configure postgresql
@@ -61,7 +63,7 @@ RUN service postgresql start && \
   sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='www-data'" | grep -q 1 || sudo -u postgres createuser -SDR www-data && \
   sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
 
-RUN wget --output-document=/app/data.pbf http://download.geofabrik.de/europe/monaco-latest.osm.pbf
+RUN wget --output-document=/app/data.pbf $OSM
 # RUN wget --output-document=/app/data.pbf http://download.geofabrik.de/europe/luxembourg-latest.osm.pbf
 # RUN wget --output-document=/app/data.pbf http://download.geofabrik.de/north-america-latest.osm.pbf
 # RUN wget --output-document=/app/data.pbf http://download.geofabrik.de/north-america/us/delaware-latest.osm.pbf
@@ -110,4 +112,6 @@ WORKDIR /app/nominatim
 RUN chmod +x ./configPostgresql.sh
 ADD start.sh /app/nominatim/start.sh
 RUN chmod +x /app/nominatim/start.sh
+
+RUN echo "Using OSM URL: "$OSM
 CMD /app/nominatim/start.sh

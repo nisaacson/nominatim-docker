@@ -5,7 +5,7 @@ Run [http://wiki.openstreetmap.org/wiki/Nominatim](http://wiki.openstreetmap.org
 Uses Ubuntu 14.04 and PostgreSQL 9.3
 
 # Country
-It downloads Europe/Monacco (latest) from geofabrik.de.
+As default it downloads Europe/Monacco (latest) from geofabrik.de during build. This can be changed by setting a build arg.
 
 If a different country should be used, change the wget line in the Dockerfile to pull a different country file.
 # Building
@@ -14,6 +14,13 @@ To rebuild the image locally execute
 
 ```
 docker build -t nominatim .
+```
+
+# Changing the OSM url to download and use a different country
+
+This example downloads the belize data during compilation:
+```
+docker build --build-arg OSM=http://download.geofabrik.de/central-america/belize-latest.osm.pbf  -t nominatim .
 ```
 
 # Running
