@@ -8,15 +8,10 @@ RUN apt-get -y install wget
 
 
 # Note: libgeos++-dev is included here too (the nominatim install page suggests installing it if there is a problem with the 'pear install DB' below - it seems safe to install it anyway)
-RUN apt-get -y install build-essential
-RUN apt-get -y install gcc git osmosis
-RUN apt-get -y install libxml2-dev libgeos-dev libpq-dev libbz2-dev libtool automake libproj-dev
-RUN apt-get -y install proj-bin libgeos-c1 libgeos++-dev
-RUN apt-get -y install libexpat1-dev
+RUN apt-get -y install build-essential gcc git osmosis  libxml2-dev libgeos-dev libpq-dev libbz2-dev libtool cmake libproj-dev proj-bin libgeos-c1 libgeos++-dev libexpat1-dev
 
 # Install Boost (required by osm2pqsql)
-RUN apt-get -y install autoconf make g++ libboost-dev \
-  libboost-system-dev libboost-filesystem-dev libboost-thread-dev
+RUN apt-get -y install autoconf make g++ libboost-dev libboost-system-dev libboost-filesystem-dev libboost-thread-dev lua5.2 liblua5.2-dev
 
 # Install PHP5
 RUN apt-get -y install php5 php-pear php5-pgsql php5-json php-db
@@ -34,25 +29,25 @@ RUN mkdir /etc/ssl/private-copy; mv /etc/ssl/private/* /etc/ssl/private-copy/; r
 # bc is needed in configPostgresql.sh
 RUN apt-get -y install bc
 
-
 # Install Apache
 RUN apt-get -y install apache2
 
 # Add Protobuf support
 RUN apt-get -y install libprotobuf-c0-dev protobuf-c-compiler
 
-RUN apt-get install -y sudo
+RUN apt-get  -y install sudo
 
 #
 
 RUN pear install DB
 RUN useradd -m -p password1234 nominatim
+RUN mkdir -p /app/git/
+RUN git clone --recursive https://github.com/twain47/Nominatim.git /app/git/
 RUN mkdir -p /app/nominatim
-RUN git clone --recursive https://github.com/twain47/Nominatim.git /app/nominatim
-RUN cd /app/nominatim
+
 WORKDIR /app/nominatim
-RUN ./autogen.sh
-RUN ./configure
+
+RUN cmake /app/git/ 
 RUN make
 
 # Configure postgresql
