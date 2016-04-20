@@ -81,8 +81,6 @@ RUN service postgresql start && \
 
 
 RUN mkdir -p /var/www/nominatim
-RUN ls settings/
-RUN cat settings/local.php
 RUN ./utils/setup.php --create-website /var/www/nominatim
 
 
