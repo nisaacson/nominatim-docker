@@ -112,4 +112,6 @@ ADD start.sh /app/nominatim/start.sh
 RUN chmod +x /app/nominatim/start.sh
 
 RUN echo "Using OSM URL: "$OSM
+
+RUN ln -s /app/nominatim/website/search.php /var/www/nominatim/index.php
 CMD /app/nominatim/start.sh
