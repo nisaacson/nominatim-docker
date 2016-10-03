@@ -1,7 +1,7 @@
 FROM ubuntu:14.04
 MAINTAINER Jan Nonnen <helvalius@gmail.com>
 # Define the OSM argument, use monaco as default
-ARG OSM=http://download.geofabrik.de/europe/monaco-latest.osm.pbf
+ARG OSM=http://download.geofabrik.de/europe-latest.osm.pbf
 
 RUN apt-get update
 
@@ -113,5 +113,7 @@ RUN chmod +x /app/nominatim/start.sh
 
 RUN echo "Using OSM URL: "$OSM
 
-RUN ln -s /app/nominatim/website/search.php /var/www/nominatim/index.php
+RUN ln -s /app/nominatim/website/search.php /var/www/nominatim/search.php
+RUN ln -s /app/nominatim/website/reverse.php /var/www/nominatim/reverse.php
+
 CMD /app/nominatim/start.sh
