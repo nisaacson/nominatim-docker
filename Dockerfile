@@ -76,9 +76,11 @@ ADD local.php /app/nominatim/settings/local.php
 RUN ./utils/setup.php --help
 
 
-RUN service postgresql start && \
-  sudo -u nominatim ./utils/setup.php --osm-file /app/data.pbf --all --threads 2
+RUN service postgresql start
 
+USER nominatim
+WORKDIR /app/nominatim
+RUN ./utils/setup.php --osm-file /app/data.pbf --all --threads 2
 
 RUN mkdir -p /var/www/nominatim
 RUN ./utils/setup.php --create-website /var/www/nominatim
