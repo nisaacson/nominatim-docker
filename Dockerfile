@@ -58,7 +58,8 @@ RUN service postgresql start && \
 RUN service postgresql start && \
   pg_createcluster --start -e UTF-8 9.3 main
 
-RUN service postgresql start && \
+RUN sudo -u postgres /usr/lib/postgresql/9.3/bin/pg_ctl start -w -D /etc/postgresql/9.3/main/ && \
+  cat /var/log/postgresql/postgresql-9.3-main.log && \
   sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='nominatim'" | grep -q 1 || sudo -u postgres createuser -s nominatim && \
   sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='www-data'" | grep -q 1 || sudo -u postgres createuser -SDR www-data && \
   sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
@@ -75,16 +76,14 @@ ADD local.php /app/nominatim/settings/local.php
 
 RUN ./utils/setup.php --help
 
-
-RUN service postgresql start
-
-USER nominatim
-WORKDIR /app/nominatim
-RUN ./utils/setup.php --osm-file /app/data.pbf --all --threads 2
+RUN chown -R nominatim:nominatim /app/nominatim
+RUN sudo -u postgres /usr/lib/postgresql/9.3/bin/pg_ctl start -w -D /etc/postgresql/9.3/main/ && \
+  sudo -u nominatim ./utils/setup.php --osm-file /app/data.pbf --all --threads 2
 
 RUN mkdir -p /var/www/nominatim
-RUN ./utils/setup.php --create-website /var/www/nominatim
-
+RUN cp -R /app/nominatim/website /var/www/nominatim/
+RUN cp -R /app/nominatim/settings /var/www/nominatim/
+RUN chown -R nominatim:www-data /var/www/nominatim
 
 
 # Adjust PostgreSQL configuration so that remote connections to the
@@ -114,8 +113,5 @@ ADD start.sh /app/nominatim/start.sh
 RUN chmod +x /app/nominatim/start.sh
 
 RUN echo "Using OSM URL: "$OSM
-
-RUN ln -s /app/nominatim/website/search.php /var/www/nominatim/search.php
-RUN ln -s /app/nominatim/website/reverse.php /var/www/nominatim/reverse.php
 
 CMD /app/nominatim/start.sh
